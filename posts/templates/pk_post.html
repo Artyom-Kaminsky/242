@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Блог группы PyE-242</title>
+    <link rel="stylesheet" href="{% static 'css/posts.css' %}">
+    <script src="{% static 'js/likes.js' %}"></script>
+</head>
+<body>
+    <header>
+        <h1>Блог группы <span class="group-name">PyE-242</span></h1>
+    </header>
+
+    <div class="main-wrapper">
+        <main class="container">
+            {% if post %}
+                <div class="post">
+                    <h2 class="post-title">{{ post.title }}</h2>
+                    <div class="post-meta">
+                        Автор: {{ post.user.username }} |
+                        Опубликовано: {{ post.date_publication|date:"d.m.Y H:i" }}
+                    </div>
+                    <div class="post-categories">
+                        {% for category in post.categories.all %}
+                            <span class="category">{{ category.title }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="post-description">{{ post.description }}</div>
+                    <div class="post-images">
+                        {% for image in post.post_images.all %}
+                            <img src="{{ image.image.url }}" alt="image" class="post-image">
+                        {% endfor %}
+                    </div>
+                    <div class="post-reactions">
+                        <button onclick="likePost('{{ post.pk }}')" id="likeButton">
+                            👍 {{ post.likes }}
+                        </button>
+                        <button onclick="dislikePost('{{post.pk}}')" id="dislikeButton">
+                            👎 {{ post.dislikes }}
+                        </button>
+                    </div>
+
+                    {% if author %}
+                    <div class="form-delete">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            <input type="submit" value="Удалить" class="btn-submit">
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Блок комментариев -->
+                <div class="comments-section">
+                    <h3>Комментарии</h3>
+
+                    {% if post.post_comments.all %}
+                        <div class="comments-list">
+                            {% for comment in post.post_comments.all %}
+                                {% if not comment.parent %}
+                                    <div class="comment">
+                                        <div class="comment-meta">
+                                            {{ comment.user.username|default:"Аноним" }} | {{ comment.date_created|date:"d.m.Y H:i" }}
+                                        </div>
+                                        <div class="comment-text">
+                                            {{ comment.text }}
+                                        </div>
+                                        <div class="comment-reactions">
+                                            👍 {{ comment.likes }} | 👎 {{ comment.dislikes }}
+                                        </div>
+
+                                        <!-- Ответы -->
+                                        {% if comment.child_comments.all %}
+                                            <div class="comment-replies">
+                                                {% for reply in comment.child_comments.all %}
+                                                    <div class="comment-reply">
+                                                        <div class="comment-meta">
+                                                            {{ reply.user.username|default:"Аноним" }} | {{ reply.date_created|date:"d.m.Y H:i" }}
+                                                        </div>
+                                                        <div class="comment-text">
+                                                            {{ reply.text }}
+                                                        </div>
+                                                        <div class="comment-reactions">
+                                                            👍 {{ reply.likes }} | 👎 {{ reply.dislikes }}
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+
+                                        <!-- Форма ответа -->
+                                        <div class="reply-form">
+                                            <form action="{% url 'add_reply' comment.id %}" method="post">
+                                                {% csrf_token %}
+                                                <textarea name="text" rows="2" placeholder="Ответить на комментарий..." required></textarea>
+                                                <button type="submit">Ответить</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>Пока нет комментариев. Будь первым!</p>
+                    {% endif %}
+
+                    <!-- Форма нового комментария -->
+
+                </div>
+                <!-- Конец блока комментариев -->
+                    <div class="new-comment-form">
+                        <h4>Оставить комментарий</h4>
+                        <form action="{% url 'add_comment' post.id %}" method="post">
+                            {% csrf_token %}
+                            <textarea name="text" rows="4" placeholder="Ваш комментарий..." required></textarea>
+                            <button type="submit">Отправить</button>
+                        </form>
+                    </div>
+            {% else %}
+                <p>Поста не существует</p>
+            {% endif %}
+        </main>
+    </div>
+</body>
+</html>

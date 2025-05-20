@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:17.2
+    container_name: ${DB_HOST}
+    volumes:
+      - pye-db-volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    restart: always
+    networks:
+      - pye
+
+  web:
+    build: .
+    container_name: pye-mvc
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - pye
+    volumes:
+    - ./mediafiles:/app/mediafiles:rw
+    - ./staticfiles:/app/staticfiles:rw
+
+networks:
+  pye:
+
+volumes:
+  pye-db-volume:

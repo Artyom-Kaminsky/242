@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Блог группы PyE-242</title>
+    <link rel="stylesheet" href="{% static 'css/posts.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Блог группы <span class="group-name">PyE-242</span></h1>
+    </header>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2>Поиск по категориям</h2>
+            <form method="get" action="">
+                <input type="text" name="category" placeholder="Введите категорию">
+                <button type="submit">Искать</button>
+            </form>
+            {% if user %}
+                <div class="empty">waghfaegbfrg</div>
+                <button type="submit">
+                    <a href="{% url 'post_form' %}">Создать пост</a>
+                </button>
+            {% endif %}
+        </aside>
+
+        <main class="container">
+            {% for post in posts %}
+                <div class="post">
+                    <h2 class="post-title">
+                        <a href="{% url 'pk_post' post.pk %}">
+                            {{ post.title }}
+                        </a>
+                    </h2>
+                    <div class="post-meta">
+                        Автор: {{ post.user.username }} |
+                        Опубликовано: {{ post.date_publication|date:"d.m.Y H:i" }}
+                    </div>
+                    <div class="post-categories">
+                        {% for category in post.categories.all %}
+                            <span class="category">{{ category.title }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="post-description">{{ post.description }}</div>
+                    <div class="post-images">
+                        {% for image in post.post_images.all %}
+                            <img src="{{ image.image.url }}" alt="image" class="post-image">
+                        {% endfor %}
+                    </div>
+                    <div class="post-reactions">
+                        👍 {{ post.likes }} |
+                        👎 {{ post.dislikes }}
+                    </div>
+                </div>
+            {% empty %}
+                <p>Постов пока нет.</p>
+            {% endfor %}
+        </main>
+    </div>
+</body>
+</html>

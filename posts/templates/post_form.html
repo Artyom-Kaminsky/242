@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if post %}Редактировать пост{% else %}Создать пост{% endif %}</title>
+    <link rel="stylesheet" href="{% static 'css/posts.css' %}">
+</head>
+<body>
+    <header>
+        <h1>{% if post %}Редактирование{% else %}Создание{% endif %} поста</h1>
+    </header>
+
+    <div class="form-wrapper">
+        <form method="post" enctype="multipart/form-data" class="post-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="title">Заголовок:</label>
+                <input type="text" id="title" name="title" value="{{ post.title|default:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Описание:</label>
+                <textarea id="description" name="description" rows="8" required>{{ post.description|default:'' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="categories">Категории:</label>
+                <select id="categories" name="categories" multiple>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}"
+                        {% if category in post.categories.all %}selected{% endif %}>
+                            {{ category.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="hint">* Зажми Ctrl или Cmd чтобы выбрать несколько</p>
+            </div>
+
+            <div class="form-group">
+                <label for="images">Изображения:</label>
+                <input type="file" id="images" name="images" multiple>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                {% if post %}Обновить{% else %}Создать{% endif %}
+            </button>
+        </form>
+    </div>
+</body>
+</html>
